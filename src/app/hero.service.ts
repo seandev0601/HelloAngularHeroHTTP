@@ -16,22 +16,28 @@ import { catchError, map, tap } from 'rxjs/operators';
 export class HeroService {
   private heroesUrl = 'api/heroes'; // URL to web api
 
+  constructor(private http: HttpClient, private messageService: MessageService) { }
+
   /** GET heroes from the server */
   getHeroes(): Observable<Hero[]> {
     //catchError() 運算子會攔截失敗的 Observable。 它把錯誤物件傳給錯誤處理器，錯誤處理器會處理這個錯誤。
-    return this.http.get<Hero[]>(this.heroesUrl).pipe(catchError(this.handleError<Hero[]>('getHeroes',[])));
+    //使用 RxJS 的 tap() 運算子來實現，該運算子會檢視 Observable 中的值，使用那些值做一些事情，並且把它們傳出來。 這種 tap() 回呼(Callback)不會改變這些值本身。
+    return this.http.get<Hero[]>(this.heroesUrl)
+    .pipe(
+      tap(_ => this.log('getched heroes')),
+      catchError(this.handleError<Hero[]>('getHeroes',[])));
   }
-
-  //修改這個建構函式，新增一個私有的 messageService 屬性引數。 Angular 將會在建立 HeroService 時把 MessageService 的單例注入到這個屬性中。
-  constructor(private http: HttpClient, private messageService: MessageService) { }
-  //這是一個典型的“服務中的服務”場景： 把 MessageService 注入到了 HeroService 中，而 HeroService 又被注入到了 HeroesComponent 中。
-
+  /** GET hero by id from the server */
   getHero(id: number): Observable<Hero> {
-    const hero = HEROES.find(h => h.id === id)!;
-    this.messageService.add(`HeroService: fetched hero id=${id}`);
-    return of(hero)
+    const url = `${this.heroesUrl}/${id}`;
+    return this.http.get<Hero>(url)
+    .pipe(
+      tap(_ => this.log(`fetched hero id=${id}`)),
+      catchError(this.handleError<Hero>(`getHero id=${id}`))
+      );
   } 
 
+  /** Insert message to MessageService */
   private log(message: string) {
     this.messageService.add(`HeroServicd: ${message}`);
   }
