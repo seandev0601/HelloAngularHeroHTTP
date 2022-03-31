@@ -7,20 +7,21 @@ import { HEROES } from './data/mock-heroes';
 import { Observable, of } from 'rxjs';
 import { MessageService } from './message.service';
 
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
 @Injectable({
   providedIn: 'root',
 })
 export class HeroService {
-//實現模擬的英雄列表
+  private heroesUrl = 'api/heroes'; // URL to web api
+
+  /** GET heroes from the server */
   getHeroes(): Observable<Hero[]> {
-    //of(HEROES) 會返回一個 Observable<Hero[]>，它會發出單個值，這個值就是這些模擬英雄的陣列。
-    const heroes = of(HEROES);
-    this.messageService.add('HeroService: fetched heroes');
-    return heroes;
+    return this.http.get<Hero[]>(this.heroesUrl);
   }
 
   //修改這個建構函式，新增一個私有的 messageService 屬性引數。 Angular 將會在建立 HeroService 時把 MessageService 的單例注入到這個屬性中。
-  constructor(private messageService: MessageService) { }
+  constructor(private http: HttpClient, private messageService: MessageService) { }
   //這是一個典型的“服務中的服務”場景： 把 MessageService 注入到了 HeroService 中，而 HeroService 又被注入到了 HeroesComponent 中。
 
   getHero(id: number): Observable<Hero> {
@@ -28,4 +29,8 @@ export class HeroService {
     this.messageService.add(`HeroService: fetched hero id=${id}`);
     return of(hero)
   } 
+
+  private log(message: string) {
+    this.messageService.add(`HeroServicd: ${message}`);
+  }
 }
