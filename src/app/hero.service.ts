@@ -8,6 +8,7 @@ import { Observable, of } from 'rxjs';
 import { MessageService } from './message.service';
 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, map, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,8 @@ export class HeroService {
 
   /** GET heroes from the server */
   getHeroes(): Observable<Hero[]> {
-    return this.http.get<Hero[]>(this.heroesUrl);
+    //catchError() 運算子會攔截失敗的 Observable。 它把錯誤物件傳給錯誤處理器，錯誤處理器會處理這個錯誤。
+    return this.http.get<Hero[]>(this.heroesUrl).pipe(catchError(this.handleError<Hero[]>('getHeroes',[])));
   }
 
   //修改這個建構函式，新增一個私有的 messageService 屬性引數。 Angular 將會在建立 HeroService 時把 MessageService 的單例注入到這個屬性中。
@@ -32,5 +34,24 @@ export class HeroService {
 
   private log(message: string) {
     this.messageService.add(`HeroServicd: ${message}`);
+  }
+
+  /**
+   * Handle Http operation that failed.
+   * Let the app continue.
+   * @param operation - name of the operation that failed
+   * @param result - optional value to return as the observable result
+   */
+  private handleError<T>(operation = 'operation', result?: T){
+    return (error: any): Observable<T> => {
+      // TODO: send the error to remote logging infrastructure
+      console.error(error); // log to console instead
+
+      // TODO: better job of transforming error for user consumption
+      this.log(`${operation} failed: ${error.message}`);
+
+      // Let the app keep running by returning an empty result.
+      return of(result as T);
+    };
   }
 }
