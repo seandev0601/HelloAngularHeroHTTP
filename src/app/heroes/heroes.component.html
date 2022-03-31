@@ -1,0 +1,13 @@
+<h2>My Heroes</h2>
+<ul class="heroes">
+  <!-- ngFor create hero view
+       toggle a CSS style class with a class binding
+       click event on hero li -->
+  <li *ngFor="let hero of heroes">
+    <a routerLink="/detail/{{hero.id}}">
+      <span class="badge">{{hero.id}}</span> {{hero.name}}
+    </a>
+  </li>
+</ul>
+<!-- set selectedHero into app-hero-detail property binding-->
+<!-- <app-hero-detail [hero]="selectedHero"></app-hero-detail> -->
